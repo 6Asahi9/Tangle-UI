@@ -34,13 +34,8 @@ public:
     enum HookType { None, Left, Right };
     HookType hookAt(const QPointF& pos) const;
 
-    QPointF hookPosition(HookType hook) const {
-        if (hook == Left)
-            return QPointF(0, m_height / 2);
-        else if (hook == Right)
-            return QPointF(m_width, m_height / 2);
-        return QPointF();
-    }
+    QPointF hookPosition(HookType hook) const;
+    ~CanvasNode();
 
 private:
     QString m_text;

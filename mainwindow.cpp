@@ -101,16 +101,14 @@ MainWindow::MainWindow(const QString &projectName,
     QShortcut* deleteShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
 
     connect(deleteShortcut, &QShortcut::activated, this, [this]() {
+    if (!canvas) return;
+    QList<QGraphicsItem*> selected = canvas->scene()->selectedItems();
+    for (QGraphicsItem* item : selected)
+    {
+        CanvasNode* node = dynamic_cast<CanvasNode*>(item);
 
-        if (!canvas) return;
-
-        QList<QGraphicsItem*> selected = canvas->scene()->selectedItems();
-
-        for (QGraphicsItem* item : selected) {
-            canvas->scene()->removeItem(item);
-
-            if (CanvasNode* node = dynamic_cast<CanvasNode*>(item))
-{
+        if (node)
+        {
             if (node->leftConnection)
                 node->leftConnection->rightConnection = nullptr;
 
@@ -119,15 +117,16 @@ MainWindow::MainWindow(const QString &projectName,
 
             if (canvas->pendingConnection == node)
                 canvas->pendingConnection = nullptr;
-
-            delete node;
         }
-        }
-    });
 
+        canvas->scene()->removeItem(item);
+        delete item;
+    }
+
+    canvas->scene()->update();   
+});
     loadViewSettings();
 }
-
 // ----------------------------------------------------
 
 void MainWindow::zoomIn()

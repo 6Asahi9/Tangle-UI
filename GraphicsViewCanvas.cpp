@@ -6,6 +6,7 @@
 #include <QScrollBar>
 #include <QMouseEvent>
 #include <QFile>
+#include <QTransform>
 
 // GraphicsViewCanvas::GraphicsViewCanvas(QWidget *parent)
 //     : QGraphicsView(parent)
@@ -27,18 +28,16 @@
 
 GraphicsViewCanvas::GraphicsViewCanvas(QWidget *parent)
     : QGraphicsView(parent),
-      pendingConnection(nullptr)   // <-- important init
+      pendingConnection(nullptr)
 {
     setAcceptDrops(true);
-    viewport()->setAcceptDrops(true); //! drop might not work without viewport()
-    // * Qt routes mouse and drag events to the viewport1
+    viewport()->setAcceptDrops(true);
 
-    setScene(new QGraphicsScene(this)); 
-    scene()->setSceneRect(-5000, -5000, 10000, 10000); //l t w h
+    setScene(new QGraphicsScene(this));
+    scene()->setSceneRect(-5000, -5000, 10000, 10000);
 
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-    //? Smooths jagged edges of lines and shapes | When scaling images (QPixmap) up or down, use better interpolation
-    setDragMode(QGraphicsView::RubberBandDrag); //This enables click-drag rectangle selection
+    setDragMode(QGraphicsView::RubberBandDrag);
 
     setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
@@ -48,26 +47,18 @@ void GraphicsViewCanvas::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasText() ||
         event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
-    {
         event->accept();
-    }
     else
-    {
         event->ignore();
-    }
 }
 
 void GraphicsViewCanvas::dragMoveEvent(QDragMoveEvent *event)
 {
     if (event->mimeData()->hasText() ||
         event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
-    {
         event->accept();
-    }
     else
-    {
         event->ignore();
-    }
 }
 
 void GraphicsViewCanvas::dropEvent(QDropEvent *event)
@@ -80,7 +71,6 @@ void GraphicsViewCanvas::dropEvent(QDropEvent *event)
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
     QPointF scenePos = mapToScene(event->position().toPoint());
-    // * mapToScene() converts view coordinates → scene coordinates.
 #else
     QPointF scenePos = mapToScene(event->pos());
 #endif
@@ -90,7 +80,6 @@ void GraphicsViewCanvas::dropEvent(QDropEvent *event)
     node->nodeId = nextId++;
 
     node->setPos(scenePos);
-
     scene()->addItem(node);
     event->accept();
 }
@@ -112,7 +101,6 @@ void GraphicsViewCanvas::wheelEvent(QWheelEvent *event)
 #else
         QPointF scenePos = mapToScene(event->pos());
 #endif
-
         if (event->angleDelta().y() > 0)
             scale(zoomFactor, zoomFactor);
         else
@@ -123,7 +111,6 @@ void GraphicsViewCanvas::wheelEvent(QWheelEvent *event)
 #else
         QPointF newScenePos = mapToScene(event->pos());
 #endif
-
         QPointF delta = newScenePos - scenePos;
         horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
         verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
@@ -131,30 +118,8 @@ void GraphicsViewCanvas::wheelEvent(QWheelEvent *event)
         event->accept();
         return;
     }
+
     QGraphicsView::wheelEvent(event);
-}
-
-QString GraphicsViewCanvas::extractTreeWidgetText(const QMimeData* mimeData)
-{
-    if (mimeData->hasText())
-        return mimeData->text();
-
-    if (!mimeData->hasFormat("application/x-qabstractitemmodeldatalist"))
-        return QString();
-
-    QByteArray encoded = mimeData->data("application/x-qabstractitemmodeldatalist");
-    QDataStream stream(&encoded, QIODevice::ReadOnly);
-
-    while (!stream.atEnd())
-    {
-        int row, col;
-        QMap<int, QVariant> roleDataMap;
-        stream >> row >> col >> roleDataMap;
-        if (roleDataMap.contains(Qt::DisplayRole))
-            return roleDataMap[Qt::DisplayRole].toString();
-    }
-
-    return QString();
 }
 
 void GraphicsViewCanvas::zoom(double factor, const QPointF& center)
@@ -173,7 +138,7 @@ void GraphicsViewCanvas::zoom(double factor, const QPointF& center)
 void GraphicsViewCanvas::mousePressEvent(QMouseEvent* event)
 {
     QGraphicsItem* item = itemAt(event->pos());
-    CanvasNode* node = dynamic_cast<CanvasNode*>(itemAt(event->pos()));
+    CanvasNode* node = dynamic_cast<CanvasNode*>(item);
     if (node)
     {
         QPointF posInNode = node->mapFromScene(mapToScene(event->pos()));
@@ -183,27 +148,23 @@ void GraphicsViewCanvas::mousePressEvent(QMouseEvent* event)
         {
             pendingConnection = node;
             pendingHook = hook;
-            return; 
-        }
-        else
-        {
-            QGraphicsView::mousePressEvent(event);
+            node->setFlag(QGraphicsItem::ItemIsMovable, false);
+            return;
         }
     }
-
+    QGraphicsView::mousePressEvent(event);
 }
 
 void GraphicsViewCanvas::mouseMoveEvent(QMouseEvent* event)
 {
-    if (pendingConnection) 
-    {
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-        mousePos = mapToScene(event->position().toPoint());
+    mousePos = mapToScene(event->position().toPoint());
 #else
-        mousePos = mapToScene(event->pos());
+    mousePos = mapToScene(event->pos());
 #endif
-        scene()->update(); 
-    }
+
+    if (pendingConnection)
+        scene()->update();
 
     QGraphicsView::mouseMoveEvent(event);
 }
@@ -212,24 +173,36 @@ void GraphicsViewCanvas::mouseReleaseEvent(QMouseEvent* event)
 {
     if (pendingConnection)
     {
+        QGraphicsItem* item = itemAt(event->pos());
+        CanvasNode* target = dynamic_cast<CanvasNode*>(item);
+
+        if (target && target != pendingConnection)
+        {
+            QPointF posInTarget = target->mapFromScene(mapToScene(event->pos()));
+            CanvasNode::HookType targetHook = target->hookAt(posInTarget);
+
+            connectNodes(pendingConnection, target,
+                         pendingHook, targetHook);
+        }
+
+        pendingConnection->setFlag(QGraphicsItem::ItemIsMovable, true);
         pendingConnection = nullptr;
         pendingHook = CanvasNode::None;
-        scene()->update(); 
+        scene()->update();
     }
 
     QGraphicsView::mouseReleaseEvent(event);
 }
 
-
 void GraphicsViewCanvas::connectNodes(CanvasNode* A, CanvasNode* B,
                                       CanvasNode::HookType fromHook,
                                       CanvasNode::HookType toHook)
 {
-    if (!A || !B || A == B)
-        return;
+    if (!A || !B || A == B) return;
 
-    // Only allow Right -> Left
-    if (fromHook != CanvasNode::Right || toHook != CanvasNode::Left)
+    // Only Right -> Left allowed
+    if (fromHook != CanvasNode::Right ||
+        toHook   != CanvasNode::Left)
         return;
 
     if (A->rightConnection || B->leftConnection)
@@ -248,7 +221,8 @@ void GraphicsViewCanvas::drawForeground(QPainter *painter, const QRectF &)
     for (QGraphicsItem* item : scene()->items())
     {
         CanvasNode* node = dynamic_cast<CanvasNode*>(item);
-        if (!node || !node->rightConnection)
+        if (!node || !node->rightConnection || 
+            !scene()->items().contains(node->rightConnection))
             continue;
 
         QPointF start = node->scenePos() + node->hookPosition(CanvasNode::Right);
@@ -265,10 +239,11 @@ void GraphicsViewCanvas::drawForeground(QPainter *painter, const QRectF &)
         painter->drawPath(path);
     }
 
-    // draw pending connection if any
     if (pendingConnection)
     {
-        QPointF start = pendingConnection->scenePos() + pendingConnection->hookPosition(pendingHook);
+        QPointF start = pendingConnection->scenePos()
+                      + pendingConnection->hookPosition(pendingHook);
+
         QPointF end = mousePos;
 
         QPointF delta = end - start;
@@ -281,7 +256,6 @@ void GraphicsViewCanvas::drawForeground(QPainter *painter, const QRectF &)
         painter->setPen(QPen(Qt::yellow, 2, Qt::DashLine));
         painter->drawPath(path);
     }
-
 }
 
 bool GraphicsViewCanvas::validateGraph()
@@ -358,4 +332,28 @@ void GraphicsViewCanvas::saveNodePtr()
     }
 
     file.close();
+}
+
+QString GraphicsViewCanvas::extractTreeWidgetText(const QMimeData* mimeData)
+{
+    if (mimeData->hasText())
+        return mimeData->text();
+
+    if (!mimeData->hasFormat("application/x-qabstractitemmodeldatalist"))
+        return QString();
+
+    QByteArray encoded = mimeData->data("application/x-qabstractitemmodeldatalist");
+    QDataStream stream(&encoded, QIODevice::ReadOnly);
+
+    while (!stream.atEnd())
+    {
+        int row, col;
+        QMap<int, QVariant> roleDataMap;
+        stream >> row >> col >> roleDataMap;
+
+        if (roleDataMap.contains(Qt::DisplayRole))
+            return roleDataMap[Qt::DisplayRole].toString();
+    }
+
+    return QString();
 }

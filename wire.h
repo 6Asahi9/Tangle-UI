@@ -1,6 +1,6 @@
 #ifndef WIRE_H
 #define WIRE_H
-
+#include <QPainterPath>
 #include <QGraphicsLineItem>
 
 class CanvasNode;
@@ -14,6 +14,7 @@ public:
     CanvasNode* toNode;
 
     void updatePosition();
+    QPainterPath shape() const override;
 };
 
 #endif

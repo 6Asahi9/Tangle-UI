@@ -3,6 +3,9 @@
 #include "Wire.h"
 #include <QGraphicsScene>
 
+static constexpr qreal HOOK_OFFSET = 12.0;   
+static constexpr qreal HOOK_HITBOX = 15.0;   
+
 CanvasNode::CanvasNode(const QString& text)
     : m_text(text)
 {
@@ -13,22 +16,35 @@ CanvasNode::CanvasNode(const QString& text)
 
 QRectF CanvasNode::boundingRect() const
 {
-    return QRectF(-m_hookRadius, 0, m_width + 2*m_hookRadius, m_height);
+    return QRectF(-HOOK_OFFSET - HOOK_HITBOX,
+                  -HOOK_HITBOX,
+                  m_width + 2*(HOOK_OFFSET + HOOK_HITBOX),
+                  m_height + 2*HOOK_HITBOX);
 }
 
 QPainterPath CanvasNode::shape() const
 {
     QPainterPath path;
-    qreal margin = 10; // smaller hitbox so hooks are easier to grab
-    path.addRect(margin, margin, m_width - 2*margin, m_height - 2*margin);
+    path.addRect(0, 0, m_width, m_height);
+    path.addEllipse(hookPosition(Left), HOOK_HITBOX, HOOK_HITBOX);
+    path.addEllipse(hookPosition(Right), HOOK_HITBOX, HOOK_HITBOX);
     return path;
+}
+
+
+QPointF CanvasNode::hookPosition(HookType hook) const
+{
+    if (hook == Left)
+        return QPointF(-HOOK_OFFSET, m_height / 2.0);
+    else // Right
+        return QPointF(m_width + HOOK_OFFSET, m_height / 2.0);
 }
 
 void CanvasNode::paint(QPainter* painter,
                        const QStyleOptionGraphicsItem*,
                        QWidget*)
 {
-    // Node body
+    // node body
     painter->setBrush(QColor(60, 60, 60));
     painter->setPen(QPen(Qt::black, 1));
     painter->drawRoundedRect(0, 0, m_width, m_height, 6, 6);
@@ -36,7 +52,7 @@ void CanvasNode::paint(QPainter* painter,
     painter->setPen(Qt::white);
     painter->drawText(0, 0, m_width, m_height, Qt::AlignCenter, m_text);
 
-    // Hooks
+    // hooks 
     QPointF leftHook = hookPosition(Left);
     painter->setBrush(Qt::green);
     painter->drawEllipse(leftHook, m_hookRadius, m_hookRadius);
@@ -61,12 +77,13 @@ QVariant CanvasNode::itemChange(GraphicsItemChange change, const QVariant &value
 
 CanvasNode::HookType CanvasNode::hookAt(const QPointF& pos) const
 {
-    const qreal hitboxRadius = m_hookRadius * 3.0;
+    const qreal r = HOOK_HITBOX;
 
-    QRectF leftBox(hookPosition(Left) - QPointF(hitboxRadius, hitboxRadius),
-                   QSizeF(hitboxRadius*2, hitboxRadius*2));
-    QRectF rightBox(hookPosition(Right) - QPointF(hitboxRadius, hitboxRadius),
-                    QSizeF(hitboxRadius*2, hitboxRadius*2));
+    QRectF leftBox(hookPosition(Left) - QPointF(r, r),
+                   QSizeF(r*2, r*2));
+
+    QRectF rightBox(hookPosition(Right) - QPointF(r, r),
+                    QSizeF(r*2, r*2));
 
     if (leftBox.contains(pos))
         return Left;
@@ -76,3 +93,11 @@ CanvasNode::HookType CanvasNode::hookAt(const QPointF& pos) const
     return None;
 }
 
+CanvasNode::~CanvasNode()
+{
+    if (leftConnection)
+        leftConnection->rightConnection = nullptr;
+
+    if (rightConnection)
+        rightConnection->leftConnection = nullptr;
+}
