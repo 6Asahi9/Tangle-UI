@@ -207,7 +207,8 @@ void GraphicsViewCanvas::connectNodes(CanvasNode* A, CanvasNode* B,
 
     if (A->rightConnection || B->leftConnection)
         return;
-
+    if (B->rightConnection == A)
+        return;
     A->rightConnection = B;
     B->leftConnection = A;
 
