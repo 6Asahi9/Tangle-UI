@@ -86,6 +86,7 @@ MainWindow::MainWindow(const QString &projectName,
 
     new QShortcut(QKeySequence("Ctrl+Return"), this, [this]() {
         savePyViewToModel();
+        reloadModelFile(); 
     });
 
     // -------- zoom shortcuts --------
@@ -242,16 +243,17 @@ void MainWindow::savePyViewToModel()
 
     for (CanvasNode* n : nodes)
     {
-        if (!n->leftWire && !n->rightWire)
-        { 
+        if (!n->leftConnection && !n->rightConnection)
+        {
             QMessageBox::warning(this,
                 "Warning",
                 "Some nodes are not connected. Connect wires first.");
             return;
         }
-        canvas->writeModelFile();
-        canvas->saveNodePtr();
     }
+
+    canvas->saveNodePtr();
+
     // QFile file(currentProjectPath + "/.tangle/model.py");
     // if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
 
@@ -269,7 +271,7 @@ void MainWindow::savePyViewToModel()
 
     for (CanvasNode* node : order)
     {
-        QString path = "toolbox/" + node->text() + ".txt";
+        QString path = QDir::currentPath() + "/../toolbox/"+ node->getText()+ ".txt";
 
         QFile snippet(path);
         if (snippet.open(QIODevice::ReadOnly))
@@ -280,6 +282,7 @@ void MainWindow::savePyViewToModel()
     }
 
     file.close();
+    reloadModelFile();
 }
 
 // ----------------------------------------------------

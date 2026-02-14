@@ -7,7 +7,7 @@
 #include <QMouseEvent>
 #include <QFile>
 #include <QTransform>
-
+#include <QKeyEvent>
 // GraphicsViewCanvas::GraphicsViewCanvas(QWidget *parent)
 //     : QGraphicsView(parent)
 // {
@@ -277,11 +277,13 @@ bool GraphicsViewCanvas::validateGraph()
 
 void GraphicsViewCanvas::writeModelFile()
 {
-    QFile file("model.py");
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    QFile outFile("model.py");
+    if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
 
-    QTextStream out(&file);
+    QTextStream out(&outFile);
 
+    // find start nodes (no parent)
     QVector<CanvasNode*> starts;
 
     for (QGraphicsItem* item : scene()->items())
@@ -291,22 +293,37 @@ void GraphicsViewCanvas::writeModelFile()
             starts.push_back(node);
     }
 
+    // optional: top-to-bottom order
     std::sort(starts.begin(), starts.end(),
               [](CanvasNode* a, CanvasNode* b)
               { return a->scenePos().y() < b->scenePos().y(); });
 
+    // traverse chains
     for (CanvasNode* start : starts)
     {
         CanvasNode* cur = start;
+
         while (cur)
         {
-            out << "# node " << cur->nodeId << "\n";
-            out << cur->getText() << "\n\n";
+            QString path = "toolbox/" + cur->getText() + ".txt";
+
+            QFile inFile(path);
+            if (inFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QTextStream in(&inFile);
+                out << in.readAll() << "\n";
+                inFile.close();
+            }
+            else
+            {
+                out << "# missing file: " << path << "\n";
+            }
+
             cur = cur->rightConnection;
         }
     }
 
-    file.close();
+    outFile.close();
 }
 
 void GraphicsViewCanvas::saveNodePtr()
@@ -357,4 +374,16 @@ QString GraphicsViewCanvas::extractTreeWidgetText(const QMimeData* mimeData)
     }
 
     return QString();
+}
+
+void GraphicsViewCanvas::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Return &&
+        event->modifiers() & Qt::ControlModifier)
+    {
+        writeModelFile();
+        return;
+    }
+
+    QGraphicsView::keyPressEvent(event);
 }

@@ -8,6 +8,7 @@
 #include <QDropEvent>
 #include <QResizeEvent>
 #include "NodeList.h"
+#include <QKeyEvent>
 
 class CanvasNode; 
 class GraphicsViewCanvas : public QGraphicsView
@@ -19,7 +20,7 @@ public:
     CanvasNode* pendingConnection = nullptr;
     NodeList nodes; 
     void writeModelFile();
-    void saveNodePtr();
+    void saveNodePtr(); 
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -36,7 +37,7 @@ protected:
     QPointF mousePos;       
     void mouseMoveEvent(QMouseEvent* event);  
     void mouseReleaseEvent(QMouseEvent* event);                   
-
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
     QString extractTreeWidgetText(const QMimeData* mimeData);
