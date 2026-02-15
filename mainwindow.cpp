@@ -271,7 +271,7 @@ void MainWindow::savePyViewToModel()
 
     for (CanvasNode* node : order)
     {
-        QString path = QDir::currentPath() + "/../toolbox/"+ node->getText()+ ".txt";
+        QString path = QDir::currentPath()+ "/../toolbox/"+ node->getText();
 
         QFile snippet(path);
         if (snippet.open(QIODevice::ReadOnly))
@@ -338,7 +338,13 @@ void MainWindow::loadToolbox(const QString& path, QTreeWidgetItem* parentItem)
             else
                 fileItem = new QTreeWidgetItem(ui.treeWidget);
 
+            QString relativePath =
+                QDir(QDir::currentPath() + "/../toolbox")
+                .relativeFilePath(info.absoluteFilePath());
+
             fileItem->setText(0, name);
+            fileItem->setData(0, Qt::UserRole, relativePath);
+
         }
 
     }

@@ -370,7 +370,7 @@ QString GraphicsViewCanvas::extractTreeWidgetText(const QMimeData* mimeData)
         stream >> row >> col >> roleDataMap;
 
         if (roleDataMap.contains(Qt::DisplayRole))
-            return roleDataMap[Qt::DisplayRole].toString();
+            return roleDataMap[Qt::UserRole].toString();
     }
 
     return QString();
