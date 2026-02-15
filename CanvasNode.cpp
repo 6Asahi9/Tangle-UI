@@ -2,13 +2,14 @@
 #include <QPainter>
 #include "Wire.h"
 #include <QGraphicsScene>
-
+#include <QFileInfo>
 static constexpr qreal HOOK_OFFSET = 12.0;   
 static constexpr qreal HOOK_HITBOX = 15.0;   
 
 CanvasNode::CanvasNode(const QString& text)
     : m_text(text)
 {
+    label = QFileInfo(text).baseName();
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
@@ -50,7 +51,7 @@ void CanvasNode::paint(QPainter* painter,
     painter->drawRoundedRect(0, 0, m_width, m_height, 6, 6);
 
     painter->setPen(Qt::white);
-    painter->drawText(0, 0, m_width, m_height, Qt::AlignCenter, m_text);
+    painter->drawText(0, 0, m_width, m_height, Qt::AlignCenter, label);
 
     // hooks 
     QPointF leftHook = hookPosition(Left);
@@ -61,6 +62,8 @@ void CanvasNode::paint(QPainter* painter,
     painter->setBrush(Qt::red);
     painter->drawEllipse(rightHook, m_hookRadius, m_hookRadius);
 }
+
+QString CanvasNode::getPath() const { return m_text; }
 
 QVariant CanvasNode::itemChange(GraphicsItemChange change, const QVariant &value)
 {

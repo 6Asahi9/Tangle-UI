@@ -36,9 +36,11 @@ public:
 
     QPointF hookPosition(HookType hook) const;
     ~CanvasNode();
+    QString getPath() const;
 
 private:
     QString m_text;
+    QString label;
 
     const qreal m_width  = 120;
     const qreal m_height = 60;

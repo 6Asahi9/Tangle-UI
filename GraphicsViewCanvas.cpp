@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QTransform>
 #include <QKeyEvent>
+#include <QDir>
 // GraphicsViewCanvas::GraphicsViewCanvas(QWidget *parent)
 //     : QGraphicsView(parent)
 // {
@@ -298,16 +299,16 @@ void GraphicsViewCanvas::writeModelFile()
               [](CanvasNode* a, CanvasNode* b)
               { return a->scenePos().y() < b->scenePos().y(); });
 
-    // traverse chains
     for (CanvasNode* start : starts)
     {
         CanvasNode* cur = start;
 
         while (cur)
         {
-            QString path = "toolbox/" + cur->getText() + ".txt";
+            QString fullPath =
+                QDir::currentPath() + "/../toolbox/" + cur->getPath();
 
-            QFile inFile(path);
+            QFile inFile(fullPath);
             if (inFile.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 QTextStream in(&inFile);
@@ -316,12 +317,13 @@ void GraphicsViewCanvas::writeModelFile()
             }
             else
             {
-                out << "# missing file: " << path << "\n";
+                out << "# missing file: " << fullPath << "\n";
             }
 
             cur = cur->rightConnection;
         }
     }
+
 
     outFile.close();
 }
