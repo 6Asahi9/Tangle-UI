@@ -354,26 +354,27 @@ QList<CanvasNode*> MainWindow::collectExecutionOrder()
 {
     QList<CanvasNode*> nodes;
 
+    // gather all nodes
     for (QGraphicsItem* item : canvas->scene()->items())
-    {
         if (CanvasNode* n = dynamic_cast<CanvasNode*>(item))
             nodes.append(n);
-    }
 
+    // find start nodes (no parent)
     QList<CanvasNode*> starts;
-
     for (CanvasNode* n : nodes)
-        if (!n->leftWire)
+        if (!n->leftConnection)
             starts.append(n);
 
+    // sort chains by Y position
     std::sort(starts.begin(), starts.end(),
               [](CanvasNode* a, CanvasNode* b)
               {
-                  return a->y() < b->y();
+                  return a->scenePos().y() < b->scenePos().y();
               });
 
     QList<CanvasNode*> result;
 
+    // DFS per chain
     for (CanvasNode* start : starts)
     {
         CanvasNode* current = start;
@@ -381,11 +382,7 @@ QList<CanvasNode*> MainWindow::collectExecutionOrder()
         while (current)
         {
             result.append(current);
-
-            if (current->rightWire)
-                current = current->rightWire->toNode;
-            else
-                current = nullptr;
+            current = current->rightConnection;
         }
     }
 
