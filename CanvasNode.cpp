@@ -3,6 +3,8 @@
 #include "Wire.h"
 #include <QGraphicsScene>
 #include <QFileInfo>
+#include "helper/CustomNodeEditor.h"
+
 static constexpr qreal HOOK_OFFSET = 12.0;   
 static constexpr qreal HOOK_HITBOX = 15.0;   
 
@@ -10,6 +12,9 @@ CanvasNode::CanvasNode(const QString& text)
     : m_text(text)
 {
     label = QFileInfo(text).baseName();
+    if (label == "custom")
+        isCustom = true;
+
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
@@ -103,4 +108,15 @@ CanvasNode::~CanvasNode()
 
     if (rightConnection)
         rightConnection->leftConnection = nullptr;
+}
+
+void CanvasNode::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (isCustom)
+    {
+        CustomNodeEditor dlg(customCode);
+        dlg.exec();
+    }
+
+    QGraphicsItem::mouseDoubleClickEvent(event);
 }

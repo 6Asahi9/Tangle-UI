@@ -11,6 +11,9 @@ class CanvasNode : public QGraphicsItem
 public:
     CanvasNode(const QString& text);
 
+    QString customCode;
+    bool isCustom = false;
+
     Wire* leftWire = nullptr;
     Wire* rightWire = nullptr;
 
@@ -33,10 +36,12 @@ public:
 
     enum HookType { None, Left, Right };
     HookType hookAt(const QPointF& pos) const;
-
+    
     QPointF hookPosition(HookType hook) const;
     ~CanvasNode();
     QString getPath() const;
+    
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
     QString m_text;

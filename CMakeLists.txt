@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
         PythonEditor.cpp
         wire.cpp
         wire.h
+        helper/CustomNodeEditor.h
+        helper/CustomNodeEditor.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

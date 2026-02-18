@@ -67,10 +67,16 @@ MainWindow::MainWindow(const QString &projectName,
     // -------- run button --------
     connect(ui.btnRun, &QPushButton::clicked, this, [this]() {
 
-        // savePyViewToModel();
-
         QString pythonPath = "python";
         QString modelFile = currentProjectPath + "/.tangle/model.py";
+
+        QFile file(modelFile);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+            return;
+
+        QTextStream out(&file);
+        out << ui.plainTextEdit->toPlainText();
+        file.close();
 
         ui.txtConsole->clear();
         appendConsole("Running model.py...\n");
@@ -87,6 +93,7 @@ MainWindow::MainWindow(const QString &projectName,
 
         process->start(pythonPath, QStringList() << modelFile);
     });
+
 
     // -------- model loading --------
     loadModelFile(currentProjectPath + "/.tangle/model.py");
@@ -278,9 +285,13 @@ void MainWindow::savePyViewToModel()
 
     QTextStream out(&file);
 
-    for (CanvasNode* node : order)
-    {
-        QString path = QDir::currentPath()+ "/../toolbox/"+ node->getText();
+    for (CanvasNode* node : order){
+        if (node->isCustom){
+            out << node->customCode << "\n";
+            continue;
+        }
+
+        QString path = QDir::currentPath()+ "/../toolbox/" + node->getText();
 
         QFile snippet(path);
         if (snippet.open(QIODevice::ReadOnly))
@@ -363,7 +374,6 @@ QList<CanvasNode*> MainWindow::collectExecutionOrder()
 {
     QList<CanvasNode*> nodes;
 
-    // gather all nodes
     for (QGraphicsItem* item : canvas->scene()->items())
         if (CanvasNode* n = dynamic_cast<CanvasNode*>(item))
             nodes.append(n);
@@ -383,7 +393,6 @@ QList<CanvasNode*> MainWindow::collectExecutionOrder()
 
     QList<CanvasNode*> result;
 
-    // DFS per chain
     for (CanvasNode* start : starts)
     {
         CanvasNode* current = start;
