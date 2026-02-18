@@ -28,6 +28,8 @@ set(PROJECT_SOURCES
         PythonEditor.cpp
         wire.cpp
         wire.h
+        ProjectManager.h
+        ProjectManager.cpp
         helper/CustomNodeEditor.h
         helper/CustomNodeEditor.cpp
 )

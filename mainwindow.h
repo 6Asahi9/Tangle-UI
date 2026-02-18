@@ -10,6 +10,7 @@
 #include "ui_mainwindow.h"
 #include "PythonHighlighter.h"
 #include "GraphicsViewCanvas.h"
+#include "ProjectManager.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -46,6 +47,8 @@ private:
     void zoomIn();
     void zoomOut();
     QList<CanvasNode*> collectExecutionOrder();
+
+    ProjectManager* projectManager = nullptr;
 };
 
 #endif // MAINWINDOW_H

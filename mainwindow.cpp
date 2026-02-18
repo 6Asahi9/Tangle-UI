@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include "CanvasNode.h"
 #include "PythonEditor.h"
+#include "ProjectManager.h"
 // ----------------------------------------------------
 
 MainWindow::MainWindow(const QString &projectName,
@@ -143,6 +144,12 @@ MainWindow::MainWindow(const QString &projectName,
     canvas->scene()->update();   
 });
     loadViewSettings();
+    
+    QString projectsJson = QCoreApplication::applicationDirPath() + "/projects.json";
+    projectManager = new ProjectManager(ui.treeWidget_2, projectsJson, this);
+    if (!projectName.isEmpty() && !currentProjectPath.isEmpty()) {
+        projectManager->addProject(projectName, currentProjectPath);
+    }
 }
 // ----------------------------------------------------
 
@@ -269,13 +276,6 @@ void MainWindow::savePyViewToModel()
     }
 
     canvas->saveNodePtr();
-
-    // QFile file(currentProjectPath + "/.tangle/model.py");
-    // if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
-
-    // QTextStream out(&file);
-    // out << ui.plainTextEdit->toPlainText();
-    // file.close();
     QList<CanvasNode*> order = collectExecutionOrder();
 
     QFile file(currentProjectPath + "/.tangle/model.py");
