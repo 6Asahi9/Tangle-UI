@@ -24,6 +24,8 @@ set(PROJECT_SOURCES
         StartupWindow.cpp
         GraphicsViewCanvas.h
         GraphicsViewCanvas.cpp
+        PythonEditor.h
+        PythonEditor.cpp
         wire.cpp
         wire.h
 )

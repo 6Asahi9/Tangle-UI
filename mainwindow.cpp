@@ -15,6 +15,7 @@
 #include <QList>
 #include <QMessageBox>
 #include "CanvasNode.h"
+#include "PythonEditor.h"
 // ----------------------------------------------------
 
 MainWindow::MainWindow(const QString &projectName,
@@ -26,8 +27,14 @@ MainWindow::MainWindow(const QString &projectName,
 
     currentProjectPath = projectPath;
     setWindowTitle("TangleML - " + projectName);
+    
+    ui.plainTextEdit->hide();
+    PythonEditor* editor = new PythonEditor(ui.tab_3);
+    editor->setGeometry(ui.plainTextEdit->geometry());
+    editor->show();
 
-    highlighter = new PythonHighlighter(ui.plainTextEdit->document());
+    highlighter = new PythonHighlighter(editor->document());
+    ui.plainTextEdit = editor; 
 
     canvas = new GraphicsViewCanvas(ui.tab_1);
     canvas->setGeometry(ui.graphicsViewCanvas->geometry());
@@ -60,7 +67,7 @@ MainWindow::MainWindow(const QString &projectName,
     // -------- run button --------
     connect(ui.btnRun, &QPushButton::clicked, this, [this]() {
 
-        savePyViewToModel();
+        // savePyViewToModel();
 
         QString pythonPath = "python";
         QString modelFile = currentProjectPath + "/.tangle/model.py";
@@ -84,7 +91,9 @@ MainWindow::MainWindow(const QString &projectName,
     // -------- model loading --------
     loadModelFile(currentProjectPath + "/.tangle/model.py");
 
-    new QShortcut(QKeySequence("Ctrl+Return"), this, [this]() {
+    ui.btnRun->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Return));
+
+    new QShortcut(QKeySequence("Ctrl+s"), this, [this]() {
         savePyViewToModel();
         reloadModelFile(); 
     });
