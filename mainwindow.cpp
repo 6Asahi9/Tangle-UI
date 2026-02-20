@@ -17,6 +17,7 @@
 #include "CanvasNode.h"
 #include "PythonEditor.h"
 #include "ProjectManager.h"
+#include "MenuManager.h"
 // ----------------------------------------------------
 
 MainWindow::MainWindow(const QString &projectName,
@@ -41,6 +42,9 @@ MainWindow::MainWindow(const QString &projectName,
     canvas->setGeometry(ui.graphicsViewCanvas->geometry());
     canvas->show();
     ui.graphicsViewCanvas->hide();
+
+    MenuManager* menuMgr = new MenuManager(ui.menubar, this);
+    menuMgr->setupMenus();
 
     // -------- engine menu --------
     QMenu *engineMenu = new QMenu(this);

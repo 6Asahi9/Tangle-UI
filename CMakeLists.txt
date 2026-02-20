@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
         wire.h
         ProjectManager.h
         ProjectManager.cpp
+        MenuManager.h
+        MenuManager.cpp
         helper/CustomNodeEditor.h
         helper/CustomNodeEditor.cpp
 )
