@@ -211,16 +211,11 @@ font-weight: bold;
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actiontesting_for_edit"/>
+    
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuCustom">
-    <property name="title">
-     <string>Custom</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuSettings">
@@ -228,18 +223,19 @@ font-weight: bold;
      <string>Settings</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuCustom"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actiontesting_for_edit">
-   <property name="text">
-    <string>testing for edit</string>
-   </property>
-  </action>
+  
  </widget>
  <resources/>
  <connections/>
