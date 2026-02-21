@@ -21,17 +21,14 @@ public:
 
         QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-        // ---- Top: File name input ----
         nameEdit = new QLineEdit(this);
         nameEdit->setPlaceholderText("Enter file name (without extension)");
         mainLayout->addWidget(nameEdit);
 
-        // ---- Middle: Python editor with highlighter ----
         editor = new PythonEditor(this);
         highlighter = new PythonHighlighter(editor->document());
         mainLayout->addWidget(editor);
 
-        // ---- Bottom: Confirm/Cancel buttons ----
         QHBoxLayout* buttonLayout = new QHBoxLayout();
         buttonLayout->addStretch(); // push buttons to right
         confirmButton = new QPushButton("Confirm", this);
@@ -40,7 +37,6 @@ public:
         buttonLayout->addWidget(cancelButton);
         mainLayout->addLayout(buttonLayout);
 
-        // Connect buttons
         connect(confirmButton, &QPushButton::clicked, this, &AddFileEditorDialog::onConfirm);
         connect(cancelButton, &QPushButton::clicked, this, &AddFileEditorDialog::reject);
     }
@@ -65,10 +61,10 @@ private slots:
         }
 
         QTextStream out(&file);
-        out << editor->toPlainText(); // write current editor text
+        out << editor->toPlainText(); 
         file.close();
 
-        accept(); // close dialog
+        accept(); 
     }
 
 private:

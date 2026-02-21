@@ -118,15 +118,16 @@ void MenuManager::DeleteFile()
 
 void MenuManager::RefreshToolbox()
 {
-    QTreeWidget* tree = m_menubar->findChild<QTreeWidget*>("treeWidget");
+    MainWindow* mw = qobject_cast<MainWindow*>(parent());
+    if (!mw) return;
+
+    QTreeWidget* tree = mw->findChild<QTreeWidget*>("treeWidget");
     if (!tree) return;
 
-    tree->clear();
-    MainWindow* mw = qobject_cast<MainWindow*>(parent());
-    if (mw) {
-        mw->loadToolbox(toolboxPath, nullptr);
-    }
+    tree->clear(); 
+    mw->loadToolbox(toolboxPath, nullptr);
 }
+
 void MenuManager::onExit(){
     qApp->quit();
 }
