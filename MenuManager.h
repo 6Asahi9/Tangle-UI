@@ -12,6 +12,8 @@ class MenuManager : public QObject
 public:
     explicit MenuManager(QMenuBar* menubar, QObject* parent = nullptr);
     void setupMenus();
+    QString toolboxPath;
+    QString customPath;
 
 signals:
     void newProjectTriggered();
@@ -47,6 +49,8 @@ private slots:
     void onNewProject();
     void AddFile();
     void onSave();
+    void DeleteFile();
+    void RefreshToolbox();
     void onExit();
 
     void onUndo();

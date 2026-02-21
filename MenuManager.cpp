@@ -2,10 +2,19 @@
 #include <QMessageBox>
 #include "StartupWindow.h"
 #include "MainWindow.h"
+#include <QDir>
+#include <QInputDialog>
+#include "helper/AddFileEditorDialog.h"
+#include <QVBoxLayout>
 
 MenuManager::MenuManager(QMenuBar* menubar, QObject* parent)
     : QObject(parent), m_menubar(menubar)
 {
+    toolboxPath = QDir::currentPath() + "/toolbox"; 
+    customPath  = toolboxPath + "/custom";
+
+    QDir dir(customPath);
+    if (!dir.exists()) dir.mkpath(customPath); 
 }
 
 void MenuManager::setupMenus()
@@ -24,19 +33,25 @@ void MenuManager::setupFileMenu()
     if (!fileMenu) return;
 
     QAction* newAction = new QAction("New Project", this);
-    QAction* openAction = new QAction("Open File", this);
+    QAction* addFileAction = new QAction("Add File", this);
     QAction* saveAction = new QAction("Save", this);
+    QAction* deleteFileAction = new QAction("Delete File", this);
+    QAction* refreshAction = new QAction("Refresh Toolbox", this);
     QAction* exitAction = new QAction("Exit", this);
 
     fileMenu->addAction(newAction);
-    fileMenu->addAction(openAction);
+    fileMenu->addAction(addFileAction);
     fileMenu->addAction(saveAction);
+    fileMenu->addAction(deleteFileAction);
+    fileMenu->addAction(refreshAction);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
     connect(newAction, &QAction::triggered, this, &MenuManager::onNewProject);
-    connect(openAction, &QAction::triggered, this, &MenuManager::AddFile);
+    connect(addFileAction, &QAction::triggered, this, &MenuManager::AddFile);
     connect(saveAction, &QAction::triggered, this, &MenuManager::onSave);
+    connect(deleteFileAction, &QAction::triggered, this, &MenuManager::DeleteFile);
+    connect(refreshAction, &QAction::triggered, this, &MenuManager::RefreshToolbox);
     connect(exitAction, &QAction::triggered, this, &MenuManager::onExit);
 }
 // ---------------------------------------------
@@ -53,7 +68,40 @@ void MenuManager::onNewProject(){
 
     start->show();
 }
-void MenuManager::AddFile()   { emit AddFileTriggered(); }
+
+void MenuManager::AddFile() {
+    // Ask for file name first
+    bool ok = false;
+    QString name = QInputDialog::getText(nullptr,
+                                         "New Text File",
+                                         "Enter file name (without extension):",
+                                         QLineEdit::Normal,
+                                         "", &ok);
+    if (!ok || name.trimmed().isEmpty()) return;
+    name = name.trimmed();
+    if (!name.endsWith(".txt", Qt::CaseInsensitive))
+        name += ".txt";
+
+    QString fullPath = customPath + "/" + name;
+
+    // Open your existing CustomNodeEditor
+    QString code;
+    CustomNodeEditor editor(code);
+    editor.setWindowTitle("File Content: " + name);
+    if (editor.exec() == QDialog::Accepted) {
+        // Write the content to file
+        QFile file(fullPath);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::critical(nullptr, "Error", "Failed to create file.");
+            return;
+        }
+        QTextStream out(&file);
+        out << code;
+        file.close();
+
+        RefreshToolbox(); // refresh tree
+    }
+}
 
 void MenuManager::onSave(){
     emit saveTriggered();
@@ -61,6 +109,49 @@ void MenuManager::onSave(){
     {
         QMetaObject::invokeMethod(parent(), "savePyViewToModel");
         QMetaObject::invokeMethod(parent(), "reloadModelFile");
+    }
+}
+
+void MenuManager::DeleteFile()
+{
+    QDir dir(customPath);
+    QStringList txtFiles = dir.entryList(QStringList() << "*.txt", QDir::Files);
+    if (txtFiles.isEmpty()) {
+        QMessageBox::information(nullptr, "Delete File", "No files to delete in toolbox/custom.");
+        return;
+    }
+    bool ok;
+    QString fileToDelete = QInputDialog::getItem(
+        nullptr,
+        "Delete Text File",
+        "Select file to delete:",
+        txtFiles,
+        0,
+        false,
+        &ok
+    );
+    if (!ok || fileToDelete.isEmpty()) return;
+    QString fullPath = customPath + "/" + fileToDelete;
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        nullptr,
+        "Confirm Delete",
+        "Are you sure you want to delete " + fileToDelete + "?",
+        QMessageBox::Yes | QMessageBox::No
+    );
+    if (reply != QMessageBox::Yes) return;
+    QFile::remove(fullPath);
+    RefreshToolbox();
+}
+
+void MenuManager::RefreshToolbox()
+{
+    QTreeWidget* tree = m_menubar->findChild<QTreeWidget*>("treeWidget");
+    if (!tree) return;
+
+    tree->clear();
+    MainWindow* mw = qobject_cast<MainWindow*>(parent());
+    if (mw) {
+        mw->loadToolbox(toolboxPath, nullptr);
     }
 }
 void MenuManager::onExit(){

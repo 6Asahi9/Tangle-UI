@@ -34,6 +34,7 @@ set(PROJECT_SOURCES
         MenuManager.cpp
         helper/CustomNodeEditor.h
         helper/CustomNodeEditor.cpp
+        helper/AddFileEditorDialog.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

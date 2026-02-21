@@ -62,7 +62,7 @@ MainWindow::MainWindow(const QString &projectName,
     //  toolbox loading -------------
     ui.treeWidget->clear();
 
-    QString toolboxPath = QDir::currentPath() + "/../toolbox";
+    QString toolboxPath = QDir::currentPath() + "/toolbox";
 
     if (QDir(toolboxPath).exists())
         loadToolbox(toolboxPath, nullptr);
