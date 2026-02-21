@@ -1,5 +1,7 @@
 #include "MenuManager.h"
 #include <QMessageBox>
+#include "StartupWindow.h"
+#include "MainWindow.h"
 
 MenuManager::MenuManager(QMenuBar* menubar, QObject* parent)
     : QObject(parent), m_menubar(menubar)
@@ -33,16 +35,37 @@ void MenuManager::setupFileMenu()
     fileMenu->addAction(exitAction);
 
     connect(newAction, &QAction::triggered, this, &MenuManager::onNewProject);
-    connect(openAction, &QAction::triggered, this, &MenuManager::onOpenFile);
+    connect(openAction, &QAction::triggered, this, &MenuManager::AddFile);
     connect(saveAction, &QAction::triggered, this, &MenuManager::onSave);
     connect(exitAction, &QAction::triggered, this, &MenuManager::onExit);
 }
+// ---------------------------------------------
 
-void MenuManager::onNewProject() { emit newProjectTriggered(); }
-void MenuManager::onOpenFile()   { emit openFileTriggered(); }
-void MenuManager::onSave()       { emit saveTriggered(); }
-void MenuManager::onExit()       { emit exitTriggered(); }
+void MenuManager::onNewProject(){
+    StartupWindow* start = new StartupWindow();
+    start->setAttribute(Qt::WA_DeleteOnClose);
+    QObject::connect(start, &StartupWindow::projectCreated,
+                     [=](const QString &name, const QString &path) {
+        MainWindow* mainWin = new MainWindow(name, path);
+        mainWin->show();
+        start->close();
+    });
 
+    start->show();
+}
+void MenuManager::AddFile()   { emit AddFileTriggered(); }
+
+void MenuManager::onSave(){
+    emit saveTriggered();
+    if (parent())
+    {
+        QMetaObject::invokeMethod(parent(), "savePyViewToModel");
+        QMetaObject::invokeMethod(parent(), "reloadModelFile");
+    }
+}
+void MenuManager::onExit(){
+    qApp->quit();
+}
 // EDIT -------------------------------
 void MenuManager::setupEditMenu()
 {
@@ -68,6 +91,7 @@ void MenuManager::setupEditMenu()
     connect(copy, &QAction::triggered, this, &MenuManager::onCopy);
     connect(paste, &QAction::triggered, this, &MenuManager::onPaste);
 }
+// ---------------------------------------------
 
 void MenuManager::onUndo() { emit undoTriggered(); }
 void MenuManager::onRedo() { emit redoTriggered(); }
@@ -90,6 +114,7 @@ void MenuManager::setupViewMenu()
     connect(fullscreen, &QAction::triggered, this, &MenuManager::onFullscreen);
     connect(toolbar, &QAction::triggered, this, &MenuManager::onToggleToolbar);
 }
+// ---------------------------------------------
 
 void MenuManager::onFullscreen()      { emit fullscreenTriggered(); }
 void MenuManager::onToggleToolbar()   { emit toggleToolbarTriggered(); }
@@ -109,6 +134,7 @@ void MenuManager::setupSettingsMenu()
     connect(preferences, &QAction::triggered, this, &MenuManager::onPreferences);
     connect(theme, &QAction::triggered, this, &MenuManager::onChangeTheme);
 }
+// ---------------------------------------------
 
 void MenuManager::onPreferences()  { emit preferencesTriggered(); }
 void MenuManager::onChangeTheme()  { emit changeThemeTriggered(); }
@@ -128,6 +154,7 @@ void MenuManager::setupAboutMenu()
     connect(aboutApp, &QAction::triggered, this, &MenuManager::onAboutApp);
     connect(aboutQt, &QAction::triggered, this, &MenuManager::onAboutQt);
 }
+// ---------------------------------------------
 
 void MenuManager::onAboutApp() { emit aboutAppTriggered(); }
 void MenuManager::onAboutQt()  { emit aboutQtTriggered(); }

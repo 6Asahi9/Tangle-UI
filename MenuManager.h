@@ -15,7 +15,7 @@ public:
 
 signals:
     void newProjectTriggered();
-    void openFileTriggered();
+    void AddFileTriggered();
     void saveTriggered();
     void exitTriggered();
 
@@ -45,7 +45,7 @@ private:
 
 private slots:
     void onNewProject();
-    void onOpenFile();
+    void AddFile();
     void onSave();
     void onExit();
 

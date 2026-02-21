@@ -18,6 +18,7 @@
 #include "PythonEditor.h"
 #include "ProjectManager.h"
 #include "MenuManager.h"
+#include "StartupWindow.h"
 // ----------------------------------------------------
 
 MainWindow::MainWindow(const QString &projectName,
@@ -43,10 +44,12 @@ MainWindow::MainWindow(const QString &projectName,
     canvas->show();
     ui.graphicsViewCanvas->hide();
 
+    // menu ------------------------
     MenuManager* menuMgr = new MenuManager(ui.menubar, this);
     menuMgr->setupMenus();
+    connect(menuMgr, &MenuManager::saveTriggered, this, [this]() {savePyViewToModel();reloadModelFile();});
 
-    // -------- engine menu --------
+    // engine menu ----------------
     QMenu *engineMenu = new QMenu(this);
     engineMenu->addAction("PyTorch");
     engineMenu->addAction("TangleML");
@@ -56,7 +59,7 @@ MainWindow::MainWindow(const QString &projectName,
         ui.btnEngine->setText(action->text());
     });
 
-    // -------- toolbox loading --------
+    //  toolbox loading -------------
     ui.treeWidget->clear();
 
     QString toolboxPath = QDir::currentPath() + "/../toolbox";
@@ -69,7 +72,7 @@ MainWindow::MainWindow(const QString &projectName,
     for (int i = 0; i < ui.treeWidget->topLevelItemCount(); ++i)
         disableParentDragging(ui.treeWidget->topLevelItem(i));
 
-    // -------- run button --------
+    // run button ---------------
     connect(ui.btnRun, &QPushButton::clicked, this, [this]() {
 
         QString pythonPath = "python";
@@ -100,7 +103,7 @@ MainWindow::MainWindow(const QString &projectName,
     });
 
 
-    // -------- model loading --------
+    // model loading ---------------------
     loadModelFile(currentProjectPath + "/.tangle/model.py");
 
     ui.btnRun->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Return));
@@ -110,7 +113,7 @@ MainWindow::MainWindow(const QString &projectName,
         reloadModelFile(); 
     });
 
-    // -------- zoom shortcuts --------
+    // zoom shortcuts -------------------------
     QShortcut *zoomIn1 = new QShortcut(QKeySequence("Ctrl+="), this);
     QShortcut *zoomIn2 = new QShortcut(QKeySequence("Ctrl++"), this);
     QShortcut *zoomOut = new QShortcut(QKeySequence("Ctrl+-"), this);
@@ -119,7 +122,7 @@ MainWindow::MainWindow(const QString &projectName,
     connect(zoomIn2, &QShortcut::activated, this, &MainWindow::zoomIn);
     connect(zoomOut, &QShortcut::activated, this, &MainWindow::zoomOut);
 
-    // -------- delete selected nodes --------
+    // delete selected nodes --------------
     QShortcut* deleteShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
 
     connect(deleteShortcut, &QShortcut::activated, this, [this]() {
@@ -156,7 +159,6 @@ MainWindow::MainWindow(const QString &projectName,
     }
 }
 // ----------------------------------------------------
-
 void MainWindow::zoomIn()
 {
     int tab = ui.tabWidget->currentIndex();

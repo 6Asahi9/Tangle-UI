@@ -31,19 +31,15 @@ private:
     QString currentProjectPath;
     PythonHighlighter *highlighter = nullptr;
 
-    // -------- Canvas
+    // Canvas
     GraphicsViewCanvas *canvas = nullptr;
 
-    // -------- Zoom state (per project)
     double canvasZoom = 1.0;
     int pyZoom = 0;
 
-    // -------- Helpers
     void disableParentDragging(QTreeWidgetItem* item);
-    
     void loadViewSettings();
     void saveViewSettings();
-    
     void zoomIn();
     void zoomOut();
     QList<CanvasNode*> collectExecutionOrder();
