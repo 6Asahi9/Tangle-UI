@@ -7,7 +7,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
-#include "CustomNodeEditor.h"
+#include "../PythonEditor.h"
+#include "../PythonHighlighter.h"
 
 class AddFileEditorDialog : public QDialog {
     Q_OBJECT
@@ -20,16 +21,17 @@ public:
 
         QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-        // ----- Top: file name -----
+        // ---- Top: File name input ----
         nameEdit = new QLineEdit(this);
         nameEdit->setPlaceholderText("Enter file name (without extension)");
         mainLayout->addWidget(nameEdit);
 
-        // ----- Middle: your existing editor -----
-        editor = new CustomNodeEditor(code, this); // still uses your CustomNodeEditor
+        // ---- Middle: Python editor with highlighter ----
+        editor = new PythonEditor(this);
+        highlighter = new PythonHighlighter(editor->document());
         mainLayout->addWidget(editor);
 
-        // ----- Bottom: buttons -----
+        // ---- Bottom: Confirm/Cancel buttons ----
         QHBoxLayout* buttonLayout = new QHBoxLayout();
         buttonLayout->addStretch(); // push buttons to right
         confirmButton = new QPushButton("Confirm", this);
@@ -46,7 +48,10 @@ public:
 private slots:
     void onConfirm() {
         QString name = nameEdit->text().trimmed();
-        if (name.isEmpty()) return;
+        if (name.isEmpty()) {
+            QMessageBox::warning(this, "Warning", "File name cannot be empty!");
+            return;
+        }
 
         if (!name.endsWith(".txt", Qt::CaseInsensitive))
             name += ".txt";
@@ -55,27 +60,22 @@ private slots:
 
         QFile file(fullPath);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::critical(this, "Error", "Failed to create file.");
+            QMessageBox::critical(this, "Error", "Failed to create file at:\n" + fullPath);
             return;
         }
 
         QTextStream out(&file);
-        out << code; // updated live by CustomNodeEditor
+        out << editor->toPlainText(); // write current editor text
         file.close();
 
-        accept(); // closes dialog
+        accept(); // close dialog
     }
-
-public:
-    QString getFileName() const { return nameEdit->text().trimmed(); }
-    QString getFileContent() const { return code; }
 
 private:
     QLineEdit* nameEdit;
+    PythonEditor* editor;
+    PythonHighlighter* highlighter;
     QPushButton* confirmButton;
     QPushButton* cancelButton;
-
-    CustomNodeEditor* editor; // your existing editor
-    QString code;             // linked to editor
     QString m_customPath;
 };

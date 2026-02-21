@@ -70,36 +70,9 @@ void MenuManager::onNewProject(){
 }
 
 void MenuManager::AddFile() {
-    // Ask for file name first
-    bool ok = false;
-    QString name = QInputDialog::getText(nullptr,
-                                         "New Text File",
-                                         "Enter file name (without extension):",
-                                         QLineEdit::Normal,
-                                         "", &ok);
-    if (!ok || name.trimmed().isEmpty()) return;
-    name = name.trimmed();
-    if (!name.endsWith(".txt", Qt::CaseInsensitive))
-        name += ".txt";
-
-    QString fullPath = customPath + "/" + name;
-
-    // Open your existing CustomNodeEditor
-    QString code;
-    CustomNodeEditor editor(code);
-    editor.setWindowTitle("File Content: " + name);
-    if (editor.exec() == QDialog::Accepted) {
-        // Write the content to file
-        QFile file(fullPath);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::critical(nullptr, "Error", "Failed to create file.");
-            return;
-        }
-        QTextStream out(&file);
-        out << code;
-        file.close();
-
-        RefreshToolbox(); // refresh tree
+    AddFileEditorDialog dlg(customPath);
+    if (dlg.exec() == QDialog::Accepted) {
+        RefreshToolbox();
     }
 }
 
