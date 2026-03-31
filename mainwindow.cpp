@@ -27,6 +27,10 @@ MainWindow::MainWindow(const QString &projectName,
     : QMainWindow(parent)
 {
     ui.setupUi(this);
+    setFixedSize(size());
+    setWindowFlags(Qt::Window |
+               Qt::WindowTitleHint |
+               Qt::WindowCloseButtonHint);
 
     currentProjectPath = projectPath;
     setWindowTitle("TangleML - " + projectName);
@@ -52,7 +56,7 @@ MainWindow::MainWindow(const QString &projectName,
     // engine menu ----------------
     QMenu *engineMenu = new QMenu(this);
     engineMenu->addAction("PyTorch");
-    engineMenu->addAction("TangleML");
+    // engineMenu->addAction("TangleML");
     ui.btnEngine->setMenu(engineMenu);
 
     connect(engineMenu, &QMenu::triggered, this, [this](QAction *action){
