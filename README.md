@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://youtu.be/LwIuaIKn9ag">
-    <img src="https://img.youtube.com/vi/LwIuaIKn9ag/maxresdefault.jpg" width="700">
+    <img src="https://img.youtube.com/vi/LwIuaIKn9ag/0.jpg" width="700">
   </a>
 </p>
 
@@ -15,6 +15,9 @@
 
 tangleML is an **experimental IDE** designed to simplify machine learning workflows by **visualizing the flow of information** and reducing repetitive code. Inspired by Blender’s node system, it allows users to **drag-and-drop boxes, connect them, and automatically generate Python code**.
 
+---
+**Underlying engine (work in progress):** :contentReference[oaicite:0]{index=0} repository for the experimental engine: [TangleML engine](https://github.com/6Asahi9/TangleML-Test)
+The engine is currently incomplete and under active experimentation.
 ---
 
 ## Table of Contents
