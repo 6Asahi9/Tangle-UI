@@ -1,4 +1,3 @@
----
 # TangleML
 
 <p align="center"><b>Project Demo Video</b></p>
@@ -7,7 +6,6 @@
 <img src="./github/images/tangle_thumbnail.png" width="700">
 </a>
 </p>
-
 
 **Experimental Visual Machine Learning IDE built with C++ & Qt**
 
