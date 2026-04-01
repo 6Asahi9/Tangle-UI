@@ -34,13 +34,14 @@ TangleMl was supposed to have its own basic engine but unfortunately repository 
 ## Features
 
 - **Drag-and-drop workflow**: Add boxes from the toolbox to the canvas and connect pointers to define data flow.
-- **Canvas → Python file sync**: Saving a project updates the Python file with the code represented by the boxes.
+- **Canvas → Python file sync**: Saving a project updates the Python file with the code represented by the boxes. (Ctrl+S)
 - **Run small code snippets**: Test code in the Python file without affecting the canvas setup.
 - **Console with dual output**:
   - Upper area: standard print/log output.
   - Lower area: images and graphs (e.g., from matplotlib).
 
-- **Custom toolbox files**: Create reusable custom boxes via the menu bar (`File → Add File`).
+- **Reusable custom boxes**: Create permanent custom nodes via the menu bar (`File → Add File`) for code that can be reused across projects.
+- **Temporary inline code box**: Drag the **custom box** onto the canvas, (`double-click it`), and write temporary code directly inside the node.
 - **Rapid ML prototyping**: Quickly create workflows without rewriting boilerplate ML code.
 
 ---
