@@ -1,10 +1,15 @@
-Perfect, Asahi. Here’s a **fully GitHub-ready, professional README** for **tangleML**, designed to look polished, organized, and open-source ready:
 
 ---
 
-# tangleML
+# TangleML
 
-![Demo Video Placeholder](path_to_demo_video)
+<p align="center">
+  <a href="https://youtu.be/LwIuaIKn9ag">
+    <img src="https://img.youtube.com/vi/LwIuaIKn9ag/maxresdefault.jpg" width="700">
+  </a>
+</p>
+
+<p align="center"><b>Project Demo Video</b></p>
 
 **Experimental Visual Machine Learning IDE built with C++ & Qt**
 
@@ -61,7 +66,7 @@ Development of tangleML was supported by [ChatGPT](https://chatgpt.com/), which 
 1. Clone the repository:
 
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/6Asahi9/Tangle-UI.git
    ```
 
 2. Open the project in **Qt Creator** or **Vscode**.
