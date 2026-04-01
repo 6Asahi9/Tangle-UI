@@ -3,13 +3,14 @@
 
 # TangleML
 
+
+<p align="center"><b>Project Demo Video</b></p>
 <p align="center">
   <a href="https://youtu.be/LwIuaIKn9ag">
     <img src="https://img.youtube.com/vi/LwIuaIKn9ag/0.jpg" width="700">
   </a>
 </p>
 
-<p align="center"><b>Project Demo Video</b></p>
 
 **Experimental Visual Machine Learning IDE built with C++ & Qt**
 
