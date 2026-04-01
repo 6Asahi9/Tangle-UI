@@ -11,13 +11,10 @@
 
 **Experimental Visual Machine Learning IDE built with C++ & Qt**
 
-tangleML is an **experimental IDE** designed to simplify machine learning workflows by **visualizing the flow of information** and reducing repetitive code. Inspired by Blender’s node system, it allows users to **drag-and-drop boxes, connect them, and automatically generate Python code**.
----
+tangleML is a visual IDE designed to simplify machine learning workflows by **showing how information moves through connected nodes** and reducing repetitive code. Inspired by Blender’s node system, it allows users to **drag boxes onto a canvas, connect them, and generate Python code automatically**.
 
-**Underlying engine (work in progress):**
-TangleMl was supposed to have its own basic engine but unfortunately repository for the experimental engine: [TangleML engine](https://github.com/6Asahi9/TangleML-Test) is currently incomplete.
-
----
+**Underlying engine status:**  
+An independent execution engine was planned as part of the architecture, but development is still incomplete. The current experimental engine repository is available here: [TangleML Engine](https://github.com/6Asahi9/TangleML-Test)
 
 ## Table of Contents
 
